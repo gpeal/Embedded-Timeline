@@ -407,6 +407,7 @@ WebInspector.doLoadedDone = function()
     ProfilerAgent.hasHeapProfiler(WebInspector._initializeCapability.bind(WebInspector, "heapProfilerPresent", null));
     TimelineAgent.supportsFrameInstrumentation(WebInspector._initializeCapability.bind(WebInspector, "timelineSupportsFrameInstrumentation", null));
     PageAgent.canOverrideDeviceMetrics(WebInspector._initializeCapability.bind(WebInspector, "canOverrideDeviceMetrics", WebInspector._doLoadedDoneWithCapabilities.bind(WebInspector)));
+    //WebInspector._doLoadedDoneWithCapabilities();
 }
 
 WebInspector._doLoadedDoneWithCapabilities = function()
