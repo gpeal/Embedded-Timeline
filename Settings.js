@@ -55,8 +55,8 @@ var Capabilities = {
     separateScriptCompilationAndExecutionEnabled: false,
     profilerCausesRecompilation: true,
     heapProfilerPresent: false,
-    canOverrideDeviceMetrics: false,
-    timelineSupportsFrameInstrumentation: false,
+    canOverrideDeviceMetrics: true,
+    timelineSupportsFrameInstrumentation: true,
 }
 
 /**

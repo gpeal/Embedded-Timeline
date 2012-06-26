@@ -37,14 +37,19 @@ var WebInspector = {
         WebInspector.inspectorView.show(parentElement);
         WebInspector.inspectorView.addEventListener(WebInspector.InspectorView.Events.PanelSelected, this._panelSelected, this);
 
+        var hiddenPanels = (InspectorFrontendHost.hiddenPanels() || "").split(',');
+
         if (WebInspector.WorkerManager.isWorkerFrontend()) {
-            this.panels.scripts = new WebInspector.ScriptsPanel();
-            this.panels.timeline = new WebInspector.TimelinePanel();
-            this.panels.profiles = new WebInspector.ProfilesPanel();
-            this.panels.console = new WebInspector.ConsolePanel();
+            if (hiddenPanels.indexOf("scripts") === -1)
+                this.panels.scripts = new WebInspector.ScriptsPanel();
+            if (hiddenPanels.indexOf("timeline") === -1)
+                this.panels.timeline = new WebInspector.TimelinePanel();
+            if (hiddenPanels.indexOf("profiles") === -1)
+                this.panels.profiles = new WebInspector.ProfilesPanel();
+            if (hiddenPanels.indexOf("console") === -1)
+                this.panels.console = new WebInspector.ConsolePanel();
             return;
         }
-        var hiddenPanels = (InspectorFrontendHost.hiddenPanels() || "").split(',');
         if (hiddenPanels.indexOf("elements") === -1)
             this.panels.elements = new WebInspector.ElementsPanel();
         if (hiddenPanels.indexOf("resources") === -1)
