@@ -100,12 +100,12 @@ WebInspector.NativeMemoryProfileType.prototype = {
                     if (size)
                         knownSize += size;
                 }
-                var unknownSize = memoryBlock.size - knownSize;
+                var otherSize = memoryBlock.size - knownSize;
 
-                if (unknownSize) {
+                if (otherSize) {
                     memoryBlock.children.push({
-                        name: "Unknown",
-                        size: unknownSize
+                        name: "Other",
+                        size: otherSize
                     });
                 }
             }
@@ -214,13 +214,14 @@ WebInspector.MemoryBlockViewProperties._initialize = function()
     {
         WebInspector.MemoryBlockViewProperties._standardBlocks[name] = new WebInspector.MemoryBlockViewProperties(fillStyle, name, WebInspector.UIString(description));
     }
-    addBlock("rgba(255, 255, 255, 0.8)", "ProcessPrivateMemory", "Total");
-    addBlock("rgba(240, 240, 250, 0.8)", "Unknown", "Unknown");
-    addBlock("rgba(250, 200, 200, 0.8)", "JSHeapAllocated", "JavaScript heap");
-    addBlock("rgba(200, 250, 200, 0.8)", "JSHeapUsed", "Used JavaScript heap");
-    addBlock("rgba(200, 170, 200, 0.8)", "MemoryCache", "Memory cache resources");
-    addBlock("rgba(250, 250, 150, 0.8)", "RenderTreeAllocated", "Render tree");
-    addBlock("rgba(200, 150, 150, 0.8)", "RenderTreeUsed", "Render tree used");
+    addBlock("hsl(  0,  0%, 100%)", "ProcessPrivateMemory", "Total");
+    addBlock("hsl(  0,  0%,  80%)", "Other", "Other");
+    addBlock("hsl( 90, 60%,  80%)", "JSHeapAllocated", "JavaScript heap");
+    addBlock("hsl( 90, 80%,  80%)", "JSHeapUsed", "Used JavaScript heap");
+    addBlock("hsl(210, 60%,  80%)", "InspectorData", "Inspector data");
+    addBlock("hsl( 30, 60%,  80%)", "MemoryCache", "Memory cache resources");
+    addBlock("hsl( 60, 60%,  80%)", "RenderTreeAllocated", "Render tree");
+    addBlock("hsl( 60, 60%,  80%)", "RenderTreeUsed", "Render tree used");
 }
 
 WebInspector.MemoryBlockViewProperties._forMemoryBlock = function(memoryBlock)
@@ -302,30 +303,31 @@ WebInspector.NativeMemoryPieChart.prototype = {
         ctx.stroke();
         ctx.closePath();
 
-        var startAngle = - Math.PI / 2;
-        var currentAngle = startAngle;
+        var currentAngle = 0;
         var memoryBlock = this._memorySnapshot;
 
         function paintPercentAndLabel(fraction, title, midAngle)
         {
             ctx.beginPath();
-            ctx.font = "14px Arial";
+            ctx.font = "13px Arial";
             ctx.fillStyle = "rgba(10, 10, 10, 0.8)";
 
-            var textX = x + radius * Math.cos(midAngle) / 2;
-            var textY = y + radius * Math.sin(midAngle) / 2;
-            ctx.fillText((100 * fraction).toFixed(0) + "%", textX, textY);
-
-            textX = x + radius * Math.cos(midAngle);
-            textY = y + radius * Math.sin(midAngle);
-            if (midAngle <= startAngle + Math.PI) {
-                textX += 10;
-                textY += 10;
-            } else {
-                var metrics = ctx.measureText(title);
-                textX -= metrics.width + 10;
-            }
+            var textX = x + (radius + 10) * Math.cos(midAngle);
+            var textY = y + (radius + 10) * Math.sin(midAngle);
+            var relativeOffset = -Math.cos(midAngle) / Math.sin(Math.PI / 12);
+            relativeOffset = Number.constrain(relativeOffset, -1, 1);
+            var metrics = ctx.measureText(title);
+            textX -= metrics.width * (relativeOffset + 1) / 2;
+            textY += 5;
             ctx.fillText(title, textX, textY);
+
+            // Do not print percentage if the sector is too narrow.
+            if (fraction > 0.03) {
+                textX = x + radius * Math.cos(midAngle) / 2;
+                textY = y + radius * Math.sin(midAngle) / 2;
+                ctx.fillText((100 * fraction).toFixed(0) + "%", textX - 8, textY + 5);
+            }
+
             ctx.closePath();
         }
 
@@ -363,3 +365,123 @@ WebInspector.NativeMemoryPieChart.prototype = {
 }
 
 WebInspector.NativeMemoryPieChart.prototype.__proto__ = WebInspector.View.prototype;
+
+/**
+ * @constructor
+ * @extends {WebInspector.View}
+ */
+WebInspector.NativeMemoryBarChart = function()
+{
+    WebInspector.View.call(this);
+    this.registerRequiredCSS("nativeMemoryProfiler.css");
+    this._memorySnapshot = null;
+    this.element = document.createElement("div");
+    this._table = this.element.createChild("table");
+    this._divs = {};
+    var row = this._table.insertRow();
+    this._totalDiv = row.insertCell().createChild("div");
+    this._totalDiv.addStyleClass("memory-bar-chart-total");
+    row.insertCell();
+}
+
+WebInspector.NativeMemoryBarChart.prototype = {
+    _updateStats: function()
+    {
+        function didReceiveMemorySnapshot(error, memoryBlock)
+        {
+            if (memoryBlock.size && memoryBlock.children) {
+                var knownSize = 0;
+                for (var i = 0; i < memoryBlock.children.length; i++) {
+                    var size = memoryBlock.children[i].size;
+                    if (size)
+                        knownSize += size;
+                }
+                var otherSize = memoryBlock.size - knownSize;
+
+                if (otherSize) {
+                    memoryBlock.children.push({
+                        name: "Other",
+                        size: otherSize
+                    });
+                }
+            }
+            this._memorySnapshot = memoryBlock;
+            this._updateView();
+        }
+        MemoryAgent.getProcessMemoryDistribution(didReceiveMemorySnapshot.bind(this));
+    },
+
+    /**
+     * @override
+     */
+    willHide: function()
+    {
+        clearInterval(this._timerId);
+    },
+
+    /**
+     * @override
+     */
+    wasShown: function()
+    {
+        this._timerId = setInterval(this._updateStats.bind(this), 200);
+    },
+
+    _updateView: function()
+    {
+        var memoryBlock = this._memorySnapshot;
+        if (!memoryBlock)
+            return;
+
+        var MB = 1024 * 1024;
+        var maxSize = 100 * MB;
+        for (var i = 0; i < memoryBlock.children.length; ++i)
+            maxSize = Math.max(maxSize, memoryBlock.children[i].size);
+        var maxBarLength = 500;
+        var barLengthSizeRatio = maxBarLength / maxSize;
+
+        for (var i = memoryBlock.children.length - 1; i >= 0 ; --i) {
+            var child = memoryBlock.children[i];
+            var name = child.name;
+            var divs = this._divs[name];
+            if (!divs) {
+                var row = this._table.insertRow();
+                var nameDiv = row.insertCell(-1).createChild("div");
+                var viewProperties = WebInspector.MemoryBlockViewProperties._forMemoryBlock(child);
+                var title = viewProperties._description;
+                nameDiv.textContent = title;
+                nameDiv.addStyleClass("memory-bar-chart-name");
+                var barCell = row.insertCell(-1);
+                barDiv = barCell.createChild("div");
+                barDiv.addStyleClass("memory-bar-chart-bar");
+                var viewProperties = WebInspector.MemoryBlockViewProperties._forMemoryBlock(child);
+                barDiv.style.backgroundColor = viewProperties._fillStyle;
+                var unusedDiv = barDiv.createChild("div");
+                unusedDiv.addStyleClass("memory-bar-chart-unused");
+                var percentDiv = barDiv.createChild("div");
+                percentDiv.addStyleClass("memory-bar-chart-percent");
+                var sizeDiv = barCell.createChild("div");
+                sizeDiv.addStyleClass("memory-bar-chart-size");
+                divs = this._divs[name] = { barDiv: barDiv, unusedDiv: unusedDiv, percentDiv: percentDiv, sizeDiv: sizeDiv };
+            }
+            var unusedSize = 0;
+            if (!!child.children) {
+                unusedSize = child.size;
+                for (var j = 0; j < child.children.length; ++j)
+                    unusedSize -= child.children[j].size;
+            }
+            var unusedLength = unusedSize * barLengthSizeRatio;
+            var barLength = child.size * barLengthSizeRatio;
+
+            divs.barDiv.style.width = barLength + "px";
+            divs.unusedDiv.style.width = unusedLength + "px";
+            divs.percentDiv.textContent = barLength > 20 ? (child.size / memoryBlock.size * 100).toFixed(0) + "%" : "";
+            divs.sizeDiv.textContent = (child.size / MB).toFixed(1) + "\u2009MB";
+        }
+
+        var viewProperties = WebInspector.MemoryBlockViewProperties._forMemoryBlock(memoryBlock);
+        this._totalDiv.textContent = viewProperties._description + ": " + (memoryBlock.size / MB).toFixed(1) + "\u2009MB";
+    }
+}
+
+WebInspector.NativeMemoryBarChart.prototype.__proto__ = WebInspector.View.prototype;

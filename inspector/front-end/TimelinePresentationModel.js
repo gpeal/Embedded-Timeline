@@ -47,10 +47,10 @@ WebInspector.TimelinePresentationModel.categories = function()
     if (WebInspector.TimelinePresentationModel._categories)
         return WebInspector.TimelinePresentationModel._categories;
     WebInspector.TimelinePresentationModel._categories = {
-        loading: new WebInspector.TimelineCategory("loading", WebInspector.UIString("Loading"), 0, "rgb(80, 135, 207)", "rgb(191, 214, 243)", "rgb(112, 162, 227)"),
-        scripting: new WebInspector.TimelineCategory("scripting", WebInspector.UIString("Scripting"), 1, "rgb(220, 163, 49)", "rgb(253, 217, 144)", "rgb(253, 191, 68)"),
-        rendering: new WebInspector.TimelineCategory("rendering", WebInspector.UIString("Rendering"), 2, "rgb(148, 88, 199)", "rgb(219, 195, 239)", "rgb(175, 120, 221)"),
-        painting: new WebInspector.TimelineCategory("painting", WebInspector.UIString("Painting"), 2, "rgb(165, 113, 208)", "rgb(224, 204, 241)", "rgb(187, 140, 227)")
+        loading: new WebInspector.TimelineCategory("loading", WebInspector.UIString("Loading"), 0, "#5A8BCC", "#8EB6E9", "#70A2E3"),
+        scripting: new WebInspector.TimelineCategory("scripting", WebInspector.UIString("Scripting"), 1, "#D8AA34", "#F3D07A", "#F1C453"),
+        rendering: new WebInspector.TimelineCategory("rendering", WebInspector.UIString("Rendering"), 2, "#8266CC", "#AF9AEB", "#9A7EE6"),
+        painting: new WebInspector.TimelineCategory("painting", WebInspector.UIString("Painting"), 2, "#5FA050", "#8DC286", "#71B363")
     };
     return WebInspector.TimelinePresentationModel._categories;
 };
@@ -107,7 +107,12 @@ WebInspector.TimelinePresentationModel.categoryForRecord = function(record)
 WebInspector.TimelinePresentationModel.isEventDivider = function(record)
 {
     var recordTypes = WebInspector.TimelineModel.RecordType;
-    return record.type === recordTypes.MarkDOMContent || record.type === recordTypes.MarkLoad || record.type === recordTypes.TimeStamp;
+    if (record.type === recordTypes.MarkDOMContent || record.type === recordTypes.MarkLoad || record.type === recordTypes.TimeStamp) {
+        var mainFrame = WebInspector.resourceTreeModel.mainFrame;
+        if (mainFrame && mainFrame.id === record.frameId)
+            return true;
+    }
+    return false;
 }
 
 WebInspector.TimelinePresentationModel.forAllRecords = function(recordsArray, callback)
@@ -290,19 +295,6 @@ WebInspector.TimelinePresentationModel.prototype = {
 
     filteredRecords: function()
     {
-        function filter(record)
-        {
-            for (var i = 0; i < this._filters.length; ++i) {
-                if (!this._filters[i].accept(record))
-                    return false;
-            }
-            return true;
-        }
-        return this._filterRecords(filter.bind(this));
-    },
-
-    _filterRecords: function(filter)
-    {
         var recordsInWindow = [];
 
         var stack = [{children: this._rootRecord.children, index: 0, parentIsCollapsed: false}];
@@ -313,7 +305,7 @@ WebInspector.TimelinePresentationModel.prototype = {
                  var record = records[entry.index];
                  ++entry.index;
 
-                 if (filter(record)) {
+                 if (this.isVisible(record)) {
                      ++record.parent._invisibleChildrenCount;
                      if (!entry.parentIsCollapsed)
                          recordsInWindow.push(record);
@@ -334,6 +326,15 @@ WebInspector.TimelinePresentationModel.prototype = {
         }
 
         return recordsInWindow;
+    },
+
+    isVisible: function(record)
+    {
+        for (var i = 0; i < this._filters.length; ++i) {
+            if (!this._filters[i].accept(record))
+                return false;
+        }
+        return true;
     }
 }
 
@@ -357,6 +358,7 @@ WebInspector.TimelinePresentationModel.Record = function(presentationModel, reco
     this.startTime = WebInspector.TimelineModel.startTimeInSeconds(record);
     this.data = record.data;
     this.type = record.type;
+    this.frameId = record.frameId;
     this.endTime = WebInspector.TimelineModel.endTimeInSeconds(record);
     this._selfTime = this.endTime - this.startTime;
     this._lastChildEndTime = this.endTime;
@@ -470,15 +472,16 @@ WebInspector.TimelinePresentationModel.Record.prototype = {
     {
         var contentHelper = new WebInspector.TimelinePresentationModel.PopupContentHelper(this.title);
 
-        if (this._children && this._children.length) {
-            contentHelper._appendTextRow(WebInspector.UIString("Self Time"), Number.secondsToString(this._selfTime, true));
-            contentHelper._appendElementRow(WebInspector.UIString("Aggregated Time"),
-                WebInspector.TimelinePresentationModel._generateAggregatedInfo(this._aggregatedStats));
-        }
         var text = WebInspector.UIString("%s (at %s)", Number.secondsToString(this._lastChildEndTime - this.startTime, true),
             Number.secondsToString(this._startTimeOffset));
         contentHelper._appendTextRow(WebInspector.UIString("Duration"), text);
 
+        if (this._children && this._children.length) {
+            contentHelper._appendTextRow(WebInspector.UIString("Self Time"), Number.secondsToString(this._selfTime, true));
+            contentHelper._appendTextRow(WebInspector.UIString("CPU Time"), Number.secondsToString(this._cpuTime, true));
+            contentHelper._appendElementRow(WebInspector.UIString("Aggregated Time"),
+                WebInspector.TimelinePresentationModel._generateAggregatedInfo(this._aggregatedStats));
+        }
         const recordTypes = WebInspector.TimelineModel.RecordType;
 
         switch (this.type) {
@@ -767,8 +770,8 @@ WebInspector.TimelinePresentationModel.createFillStyle = function(context, width
 {
     var gradient = context.createLinearGradient(0, 0, width, height);
     gradient.addColorStop(0, color0);
-    gradient.addColorStop(0.3, color1);
-    gradient.addColorStop(0.7, color1);
+    gradient.addColorStop(0.25, color1);
+    gradient.addColorStop(0.75, color1);
     gradient.addColorStop(1, color2);
     return gradient;
 }
@@ -782,6 +785,22 @@ WebInspector.TimelinePresentationModel.createFillStyle = function(context, width
 WebInspector.TimelinePresentationModel.createFillStyleForCategory = function(context, width, height, category)
 {
     return WebInspector.TimelinePresentationModel.createFillStyle(context, width, height, category.fillColorStop0, category.fillColorStop1, category.borderColor);
+}
+
+/**
+ * @param {WebInspector.TimelineCategory} category
+ */
+WebInspector.TimelinePresentationModel.createStyleRuleForCategory = function(category)
+{
+    var selector = ".timeline-category-" + category.name + " .timeline-graph-bar, " +
+        ".timeline-category-statusbar-item.timeline-category-" + category.name + " .timeline-category-checkbox, " +
+        ".popover .timeline-" + category.name + ", " +
+        ".timeline-category-" + category.name + " .timeline-tree-icon"
+
+    return selector + " { background-image: -webkit-linear-gradient(" +
+       category.fillColorStop0 + ", " + category.fillColorStop1 + " 25%, " + category.fillColorStop1 + " 75%, " + category.borderColor + ");" +
+       " border-color: " + category.borderColor +
+       "}";
 }
 
 /**

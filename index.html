@@ -40,7 +40,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <script type="text/javascript" src="inspector/front-end/inspector.js"></script>
     <script type="text/javascript" src="inspector/front-end/UIUtils.js"></script>
     <script type="text/javascript" src="inspector/front-end/InspectorBackend.js"></script>
-    <script type="text/javascript" src="../devtoolsAdapter/InspectorBackendCommands.js"></script>
+    <script type="text/javascript" src="devtoolsAdapter/InspectorBackendCommands.js"></script>
     <script type="text/javascript" src="inspector/front-end/ExtensionRegistryStub.js"></script>
     <script type="text/javascript" src="inspector/front-end/InspectorFrontendAPI.js"></script>
     <script type="text/javascript" src="inspector/front-end/Object.js"></script>
@@ -215,12 +215,19 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <script type="text/javascript" src="inspector/front-end/SnippetStorage.js"></script>
     <script type="text/javascript" src="inspector/front-end/ScriptSnippetModel.js"></script>
     <script type="text/javascript" src="inspector/front-end/StylesPanel.js"></script>
-    <link rel="stylesheet" type="text/css" href="../chromium/devTools.css">
+    <link rel="stylesheet" type="text/css" href="chromium/devTools.css">
     <script type="text/javascript" src="chromium/DevTools.js"></script>
     <script type="text/javascript" src="chromium/DevToolsExtensionAPI.js"></script>
     <script type="text/javascript" src="chromium/Tests.js"></script>
     <script type="text/javascript" src="devtoolsAdapter/ScriptInjector.js"></script>
     <script type="text/javascript" src="devtoolsAdapter/embedDevtools.js"></script>
+    <script>
+        // the inspector loads files by xhr and expects to be in the front-end directory
+        var atAdapter = document.URL.indexOf('devtoolsAdapter');
+        var base = document.URL.substr(0, atAdapter) + "inspector/front-end/";
+        console.log("embedDevtools setting base to "+base);
+        document.write("<BASE href='" + base + "' />");
+    </script>
 </head>
 <body class="detached" id="-webkit-web-inspector">
     <div id="toolbar">

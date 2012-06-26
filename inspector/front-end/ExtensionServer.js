@@ -61,12 +61,12 @@ WebInspector.ExtensionServer = function()
     this._registerHandler(commands.GetResourceContent, this._onGetResourceContent.bind(this));
     this._registerHandler(commands.Log, this._onLog.bind(this));
     this._registerHandler(commands.Reload, this._onReload.bind(this));
-    this._registerHandler(commands.SendCommand, this._onSendCommand.bind(this));
     this._registerHandler(commands.SetOpenResourceHandler, this._onSetOpenResourceHandler.bind(this));
     this._registerHandler(commands.SetResourceContent, this._onSetResourceContent.bind(this));
     this._registerHandler(commands.SetSidebarHeight, this._onSetSidebarHeight.bind(this));
     this._registerHandler(commands.SetSidebarContent, this._onSetSidebarContent.bind(this));
     this._registerHandler(commands.SetSidebarPage, this._onSetSidebarPage.bind(this));
+    this._registerHandler(commands.ShowPanel, this._onShowPanel.bind(this));
     this._registerHandler(commands.StopAuditCategoryRun, this._onStopAuditCategoryRun.bind(this));
     this._registerHandler(commands.Subscribe, this._onSubscribe.bind(this));
     this._registerHandler(commands.Unsubscribe, this._onUnsubscribe.bind(this));
@@ -203,6 +203,12 @@ WebInspector.ExtensionServer.prototype = {
         WebInspector.panels[id] = panel;
         WebInspector.addPanel(panel);
         return this._status.OK();
+    },
+
+    _onShowPanel: function(message)
+    {
+        // Note: WebInspector.showPanel already sanitizes input.
+        WebInspector.showPanel(message.id);
     },
 
     _onCreateStatusBarButton: function(message, port)
@@ -468,7 +474,7 @@ WebInspector.ExtensionServer.prototype = {
         var resource = WebInspector.resourceTreeModel.resourceForURL(message.url);
         if (!resource)
             return this._status.E_NOTFOUND(message.url);
-        this._getResourceContent(resource, message, port);
+        this._getResourceContent(resource.uiSourceCode() || resource, message, port);
     },
 
     _onSetResourceContent: function(message, port)
@@ -530,16 +536,7 @@ WebInspector.ExtensionServer.prototype = {
             return this._status.E_NOTFOUND(message.resultId);
         auditRun.cancel();
     },
-    
-    _onSendCommand: function(message, port) 
-    {
-        function dispatchSendCommandReply(result) 
-        {
-            this._dispatchCallback(message.requestId, port, result);
-        }
-        InspectorBackend._wrapCallbackAndSendMessageObject(message.method, message.params, dispatchSendCommandReply.bind(this));
-    },
-    
+
     _dispatchCallback: function(requestId, port, result)
     {
         if (requestId)
@@ -620,11 +617,6 @@ WebInspector.ExtensionServer.prototype = {
         this._postNotification(WebInspector.extensionAPI.Events.TimelineEventRecorded, event.data);
     },
 
-    _notifyRemoteDebugEvent: function(data) {
-        var domain = data.method.split('.')[0];
-    	this._postNotification(WebInspector.extensionAPI.Events.RemoteDebug + domain, data);	
-    },
-
     /**
      * @param {Array.<ExtensionDescriptor>} extensions
      */
@@ -671,13 +663,11 @@ WebInspector.ExtensionServer.prototype = {
 
     _registerExtension: function(origin, port)
     {
-        // TODO make _registeredExtensions an array to allow multiple extensions/origin
         if (!this._registeredExtensions.hasOwnProperty(origin)) {
             if (origin !== window.location.origin) // Just ignore inspector frames.
                 console.error("Ignoring unauthorized client request from " + origin);
             return;
         }
-        InspectorBackend.registerExtensionDispatcher(this._notifyRemoteDebugEvent.bind(this));
         port._extensionOrigin = origin;
         port.addEventListener("message", this._onmessage.bind(this), false);
         port.start();
