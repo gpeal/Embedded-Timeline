@@ -37,19 +37,14 @@ var WebInspector = {
         WebInspector.inspectorView.show(parentElement);
         WebInspector.inspectorView.addEventListener(WebInspector.InspectorView.Events.PanelSelected, this._panelSelected, this);
 
-        var hiddenPanels = (InspectorFrontendHost.hiddenPanels() || "").split(',');
-
         if (WebInspector.WorkerManager.isWorkerFrontend()) {
-            if (hiddenPanels.indexOf("scripts") === -1)
-                this.panels.scripts = new WebInspector.ScriptsPanel();
-            if (hiddenPanels.indexOf("timeline") === -1)
-                this.panels.timeline = new WebInspector.TimelinePanel();
-            if (hiddenPanels.indexOf("profiles") === -1)
-                this.panels.profiles = new WebInspector.ProfilesPanel();
-            if (hiddenPanels.indexOf("console") === -1)
-                this.panels.console = new WebInspector.ConsolePanel();
+            this.panels.scripts = new WebInspector.ScriptsPanel();
+            this.panels.timeline = new WebInspector.TimelinePanel();
+            this.panels.profiles = new WebInspector.ProfilesPanel();
+            this.panels.console = new WebInspector.ConsolePanel();
             return;
         }
+        var hiddenPanels = (InspectorFrontendHost.hiddenPanels() || "").split(',');
         if (hiddenPanels.indexOf("elements") === -1)
             this.panels.elements = new WebInspector.ElementsPanel();
         if (hiddenPanels.indexOf("resources") === -1)
@@ -401,14 +396,12 @@ WebInspector.doLoadedDone = function()
     WebInspector.WorkerManager.loaded();
 
     DebuggerAgent.causesRecompilation(WebInspector._initializeCapability.bind(WebInspector, "debuggerCausesRecompilation", null));
-    //commented because it was causing an error and hopefullt won't be needed
     //DebuggerAgent.supportsSeparateScriptCompilationAndExecution(WebInspector._initializeCapability.bind(WebInspector, "separateScriptCompilationAndExecutionEnabled", null));
     ProfilerAgent.causesRecompilation(WebInspector._initializeCapability.bind(WebInspector, "profilerCausesRecompilation", null));
     ProfilerAgent.isSampling(WebInspector._initializeCapability.bind(WebInspector, "samplingCPUProfiler", null));
     ProfilerAgent.hasHeapProfiler(WebInspector._initializeCapability.bind(WebInspector, "heapProfilerPresent", null));
     TimelineAgent.supportsFrameInstrumentation(WebInspector._initializeCapability.bind(WebInspector, "timelineSupportsFrameInstrumentation", null));
     PageAgent.canOverrideDeviceMetrics(WebInspector._initializeCapability.bind(WebInspector, "canOverrideDeviceMetrics", WebInspector._doLoadedDoneWithCapabilities.bind(WebInspector)));
-    //WebInspector._doLoadedDoneWithCapabilities();
 }
 
 WebInspector._doLoadedDoneWithCapabilities = function()
