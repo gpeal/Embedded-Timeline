@@ -7,6 +7,11 @@ WebInspector.TimelineEmbedded = function() {
 	WebInspector.resourceTreeModel = new WebInspector.ResourceTreeModel(WebInspector.networkManager);
 	WebInspector.debuggerModel = new WebInspector.DebuggerModel();
 	this.timelinePanel = new WebInspector.TimelinePanel();
+	this.timelinePanel._overviewPane._frameOverview = new WebInspector.TimelineFrameOverview(this.timelinePanel._model);
+
+	//more dependencies needed for displaying loaded data
+	this._frameController = new WebInspector.TimelineFrameController(this.timelinePanel._model, this.timelinePanel._overviewPane, this.timelinePanel._presentationModel);
+
 }
 
 
