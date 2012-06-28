@@ -5,8 +5,6 @@ WebInspector.loadTimelineResources = function() {
 	this.networkManager = new WebInspector.NetworkManager();
 	this.resourceTreeModel = new WebInspector.ResourceTreeModel(this.networkManager);
 	this.debuggerModel = new WebInspector.DebuggerModel();
-	this.searchController = new WebInspector.SearchController();
-	this.toolbar = new WebInspector.Toolbar();
 	this.inspectorView = new WebInspector.InspectorView();
 	this.drawer = new WebInspector.Drawer();
 
@@ -40,6 +38,7 @@ var embedTimeline = function() {
 	//because this isn't running inside of a fully fledged inspector, some of the methods that set all of the panels styles aren't called
 	WebInspector.timelinePanel.splitView._restoreSidebarWidth()
 	WebInspector.timelinePanel.wasShown();
+	WebInspector.timelinePanel._overviewPane._update();
 }
 
 var requestTimelineLog = function() {
