@@ -1,50 +1,55 @@
-WebInspector.TimelineEmbedded = function() {
-	WebInspector.timelineManager = new WebInspector.TimelineManager();
-	//needed for the timeline panel
-	WebInspector.shortcutsScreen = new WebInspector.ShortcutsScreen();
-	WebInspector.networkManager = new WebInspector.NetworkManager();
-	WebInspector.console = new WebInspector.ConsoleModel();
-	WebInspector.console.addEventListener(WebInspector.ConsoleModel.Events.ConsoleCleared, WebInspector._updateErrorAndWarningCounts, this);
-    WebInspector.console.addEventListener(WebInspector.ConsoleModel.Events.MessageAdded, WebInspector._updateErrorAndWarningCounts, this);
-    WebInspector.console.addEventListener(WebInspector.ConsoleModel.Events.RepeatCountUpdated, WebInspector._updateErrorAndWarningCounts, this);
-	WebInspector.resourceTreeModel = new WebInspector.ResourceTreeModel(WebInspector.networkManager);
-	WebInspector.debuggerModel = new WebInspector.DebuggerModel();
-	WebInspector.searchController = new WebInspector.SearchController();
-	WebInspector.toolbar = new WebInspector.Toolbar();
-
-	WebInspector.inspectorView = new WebInspector.InspectorView();
+WebInspector.loadTimelineResources = function() {
+	this.timelineManager = new WebInspector.TimelineManager();
+	this.shortcutsScreen = new WebInspector.ShortcutsScreen();
+	this.console = new WebInspector.ConsoleModel();
+	this.networkManager = new WebInspector.NetworkManager();
+	this.resourceTreeModel = new WebInspector.ResourceTreeModel(this.networkManager);
+	this.debuggerModel = new WebInspector.DebuggerModel();
+	this.searchController = new WebInspector.SearchController();
+	this.toolbar = new WebInspector.Toolbar();
+	this.inspectorView = new WebInspector.InspectorView();
+	this.drawer = new WebInspector.Drawer();
 
 	this.timelinePanel = new WebInspector.TimelinePanel();
 	this.timelinePanel._overviewPane._frameOverview = new WebInspector.TimelineFrameOverview(this.timelinePanel._model);
 
-	//more dependencies needed for displaying loaded data
 	this._frameController = new WebInspector.TimelineFrameController(this.timelinePanel._model, this.timelinePanel._overviewPane, this.timelinePanel._presentationModel);
-	//used for timlinePanel.wasShown
-	WebInspector.drawer = new WebInspector.Drawer();
-
 }
 
+var loaded = function() {
+	WebInspector.loadTimelineResources();
+	embedTimeline();
+	requestTimelineLog();
+}
 
-window.addEventListener("DOMContentLoaded", embedTimeline, false);
+window.addEventListener("DOMContentLoaded", loaded, false);
 
-
-function embedTimeline() {
-	this.timelineEmbedded = new WebInspector.TimelineEmbedded();
+var embedTimeline = function() {
+	//insert the Timeline in the DOM
 	var mainDiv = document.getElementById("main");
 	var mainPanelsDiv = document.createElement("div");
 	mainPanelsDiv.id = "main-panels"
 	mainDiv.appendChild(mainPanelsDiv)
-
-	var timelineDiv = this.timelineEmbedded.timelinePanel.element;
-	//needed because WebKit really doesn't want you embedding the inspector in a webpage
+	var timelineDiv = WebInspector.timelinePanel.element;
+	//WekKit doesn't want you to embed inspector elements in a page so they identify elements that came from the inspector because they have
+	//a __view proerty and override the appendChild method...
 	timelineDiv.__view = null;
 	timelineDiv.addStyleClass("visible");
 	mainPanelsDiv.appendChild(timelineDiv);
+
 	//because this isn't running inside of a fully fledged inspector, some of the methods that set all of the panels styles aren't called
-	this.timelineEmbedded.timelinePanel.splitView._restoreSidebarWidth()
-	//adds style properties (none of the background images load without this)
-	//this.timelineEmbedded.timelinePanel._overviewModeSetting.set("Events");
-	this.timelineEmbedded.timelinePanel.wasShown();
-	//WebInspector.inspectorView.setCurrentPanel(this.embedTimeline.timelinePanel);
-	console.log("created timeline");
+	WebInspector.timelinePanel.splitView._restoreSidebarWidth()
+	WebInspector.timelinePanel.wasShown();
+}
+
+var requestTimelineLog = function() {
+	var xhr = new XMLHttpRequest();
+    xhr.open("GET", "Logs/timeline_data", false);
+    xhr.send(null);
+    if(xhr.status == 200) {
+    	console.log("Loading Timeline Data");
+    	var data = JSON.parse(xhr.responseText);
+        WebInspector.timelinePanel._model.reset();
+        WebInspector.timelinePanel._model._loadNextChunk(data, 1);
+    }
 }
