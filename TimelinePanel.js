@@ -567,7 +567,7 @@ WebInspector.TimelinePanel.prototype = {
             WebInspector.TimelinePanel._categoryStylesInitialized = true;
             this._injectCategoryStyles();
         }
-        this._overviewPane.setMode(this._overviewModeSetting.get());
+        //this._overviewPane.setMode(this._overviewModeSetting.get());
         this._refresh();
         WebInspector.drawer.currentPanelCounters = this.recordsCounter;
     },
