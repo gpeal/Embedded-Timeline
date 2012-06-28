@@ -194,7 +194,7 @@ WebInspector.TimelinePanel.prototype = {
 
     get statusBarItems()
     {
-        var statusBarItems = [ this.toggleFilterButton.element, this.toggleTimelineButton.element, this.clearButton.element, this.garbageCollectButton.element, this._glueParentButton.element, this.statusBarFilters ];
+        var statusBarItems = [ this.toggleFilterButton.element, this._glueParentButton.element, this.statusBarFilters ];
 
         return statusBarItems;
     },
