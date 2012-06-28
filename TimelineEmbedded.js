@@ -31,9 +31,11 @@ var embedTimeline = function() {
 	var timelineDiv = WebInspector.timelinePanel.element;
 	//WekKit doesn't want you to embed inspector elements in a page so they identify elements that came from the inspector because they have
 	//a __view proerty and override the appendChild method...
+	var __view = timelineDiv.__view;
 	timelineDiv.__view = null;
 	timelineDiv.addStyleClass("visible");
 	mainPanelsDiv.appendChild(timelineDiv);
+	timelineDiv.__view = __view;
 
 	//because this isn't running inside of a fully fledged inspector, some of the methods that set all of the panels styles aren't called
 	WebInspector.timelinePanel.splitView._restoreSidebarWidth()
