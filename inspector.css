@@ -427,6 +427,17 @@ body:not(.platform-mac) .toolbar-item.close-left {
 #main {
     position: absolute;
     z-index: 1;
+    top: 56px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    background-color: white;
+}
+
+#main-no-status-bar {
+    position: absolute;
+    z-index: 1;
     top: 0px;
     left: 0;
     right: 0;
