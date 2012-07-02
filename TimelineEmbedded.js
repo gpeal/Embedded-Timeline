@@ -75,6 +75,8 @@ WebInspector.TimelineEmbedded.prototype =  {
         setTimeout(this._reloadPanels, delay);
     },
 
+    
+
     _reloadPanels: function()
     {
         //An annoying hack required because the timeline needs to re-switch to the Events view but
@@ -84,12 +86,22 @@ WebInspector.TimelineEmbedded.prototype =  {
     }
 }
 
-
 var pageLoaded = function() {
     WebInspector.initializeEmbeddedTimeline();
     WebInspector.timelineEmbedded = new WebInspector.TimelineEmbedded();
     WebInspector.timelineEmbedded.show();
-    WebInspector.timelineEmbedded.loadFromUrl("Logs/timeline_data")
+    WebInspector.timelineEmbedded.loadFromUrl(getJSONUrl());
 }
 
 window.addEventListener("DOMContentLoaded", pageLoaded, false);
+
+function getJSONUrl()
+{
+  var name = "url".replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+  var results = regex.exec(window.location.search);
+  if(results == null)
+    return "";
+  else
+    return decodeURIComponent(results[1].replace(/\+/g, " "));
+}
