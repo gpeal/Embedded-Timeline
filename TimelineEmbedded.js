@@ -13,13 +13,18 @@
     this.drawer = new WebInspector.Drawer();
 
     this.timelinePanel = new WebInspector.TimelinePanel();
+    //this.timelinePanel.show(); 
     this.timelinePanel._isShowing = true;
     this.timelinePanel._overviewPane._frameOverview = new WebInspector.TimelineFrameOverview(this.timelinePanel._model);
 
     this._frameController = new WebInspector.TimelineFrameController(this.timelinePanel._model, this.timelinePanel._overviewPane, this.timelinePanel._presentationModel);
 }
 
-WebInspector.TimelineEmbedded = function() {}
+/**
+ * @constructor
+ * @extends {WebInspector.Object}
+ */
+WebInspector.TimelineEmbedded = function() { }
 
 WebInspector.TimelineEmbedded.prototype =  {
     show: function() 
@@ -30,13 +35,16 @@ WebInspector.TimelineEmbedded.prototype =  {
         mainPanelsDiv.id = "main-panels"
         mainDiv.appendChild(mainPanelsDiv)
         var timelineDiv = WebInspector.timelinePanel.element;
-        //WekKit doesn't want you to embed inspector elements in a page so they identify elements that came from the inspector because they have
+        //WebKit doesn't want you to embed inspector elements in a page so they identify elements that came from the inspector because they have
         //a __view proerty and override the appendChild method...
+        //FIXME: is is bad practice to modify private properties outside of their class. However, at this time there are no methods to change __view
         var __view = timelineDiv.__view;
         timelineDiv.__view = null;
         timelineDiv.addStyleClass("visible");
         mainPanelsDiv.appendChild(timelineDiv);
         timelineDiv.__view = __view;
+        //why doesn't this work?
+        //WebInspector.View._originalAppendChild.call(mainPanelsDiv, timelineDiv);
 
         //because this isn't running inside of a fully fledged inspector, some of the methods that set all of the panels styles aren't called
         WebInspector.timelinePanel.splitView._restoreSidebarWidth()
@@ -51,21 +59,20 @@ WebInspector.TimelineEmbedded.prototype =  {
     */
     loadFromUrl: function(url, delay)
     {
-        if(arguments.length == 1) {
+        if(arguments.length == 1)
             delay = 1000;
-        }
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, false);
         xhr.send(null);
         if(xhr.status == 200) {
-        var data = JSON.parse(xhr.responseText);
-        WebInspector.timelinePanel._model.reset();
-        WebInspector.timelinePanel._model._loadNextChunk(data, 1);
-    }
-    //I guess the frames take a while to load in so if you try to redraw the canvas too soon
-    //it will only draw some of the frames
-    //1000ms second was found to be sufficient to load fairly long records (~15s)
-    setTimeout(this._reloadPanels, delay);
+            var data = JSON.parse(xhr.responseText);
+            WebInspector.timelinePanel._model.reset();
+            WebInspector.timelinePanel._model._loadNextChunk(data, 1);
+        }
+        //I guess the frames take a while to load in so if you try to redraw the canvas too soon
+        //it will only draw some of the frames
+        //1000ms second was found to be sufficient to load fairly long records (~15s)
+        setTimeout(this._reloadPanels, delay);
     },
 
     _reloadPanels: function()
