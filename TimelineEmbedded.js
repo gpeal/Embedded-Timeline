@@ -97,9 +97,7 @@ window.addEventListener("DOMContentLoaded", pageLoaded, false);
 
 function getJSONUrl()
 {
-  var name = "url".replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
-  var results = regex.exec(window.location.search);
+  var results = new RegExp("[\\?&]" + "url" + "=([^&#]*)").exec(window.location.search);
   if(results == null)
     return "";
   else
