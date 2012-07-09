@@ -311,10 +311,7 @@ WebInspector.formatLinkText = function(url, lineNumber)
 WebInspector.linkifyResourceAsNode = function(url, lineNumber, classes, tooltipText)
 {
     var linkText = WebInspector.formatLinkText(url, lineNumber);
-    //NOTE: changed isExternal to true because the embedded timeline doesn't have the resource view
-    //to show the resource in the timline so it opens in a new tab
-    //FIXME: not sure how to integrate this better
-    var anchor = WebInspector.linkifyURLAsNode(url, linkText, classes, true, tooltipText);
+    var anchor = WebInspector.linkifyURLAsNode(url, linkText, classes, false, tooltipText);
     anchor.preferredPanel = "resources";
     anchor.lineNumber = lineNumber;
     return anchor;

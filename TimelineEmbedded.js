@@ -1,3 +1,18 @@
+WebInspector.ResourceTreeModelEmbedded = function() { }
+
+WebInspector.ResourceTreeModelEmbedded.prototype.__proto__ = WebInspector.ResourceTreeModel.prototype;
+
+WebInspector.linkifyResourceAsNode = function(url, lineNumber, classes, tooltipText)
+{
+    var linkText = WebInspector.formatLinkText(url, lineNumber);
+    //NOTE: changed isExternal to true because the embedded timeline doesn't have the resource view
+    //to show the resource in the timline so it opens in a new tab
+    //FIXME: not sure how to integrate this better
+    var anchor = WebInspector.linkifyURLAsNode(url, linkText, classes, true, tooltipText);
+    anchor.preferredPanel = "resources";
+    anchor.lineNumber = lineNumber;
+    return anchor;
+}
 /*
  * Embedded Timeline creates a special Timeline Pane that can be embedded in an iframe
  * All the page needs is a div with the id "main"
@@ -5,15 +20,12 @@
  WebInspector.initializeEmbeddedTimeline = function() {
     this.timelineManager = new WebInspector.TimelineManager();
     this.shortcutsScreen = new WebInspector.ShortcutsScreen();
-    this.console = new WebInspector.ConsoleModel();
-    this.networkManager = new WebInspector.NetworkManager();
-    this.resourceTreeModel = new WebInspector.ResourceTreeModel(this.networkManager);
+    this.resourceTreeModel = new WebInspector.ResourceTreeModelEmbedded();
     this.debuggerModel = new WebInspector.DebuggerModel();
     this.inspectorView = new WebInspector.InspectorView();
     this.drawer = new WebInspector.Drawer();
 
     this.timelinePanel = new WebInspector.TimelinePanel();
-    //this.timelinePanel.show(); 
     this.timelinePanel._isShowing = true;
     this.timelinePanel._overviewPane._frameOverview = new WebInspector.TimelineFrameOverview(this.timelinePanel._model);
 
