@@ -2,21 +2,37 @@ WebInspector.ResourceTreeModelEmbedded = function() { }
 
 WebInspector.ResourceTreeModelEmbedded.prototype.__proto__ = WebInspector.ResourceTreeModel.prototype;
 
+WebInspector.ResourceTreeModel = WebInspector.ResourceTreeModelEmbedded;
 
-WebInspector.Linkifier.prototype.linkifyLocation = function(sourceURL, lineNumber, columnNumber, classes)
+
+
+WebInspector.LinkifierEmbedded = function() {
+    WebInspector.Linkifier.constructor.call(this);
+}
+
+WebInspector.LinkifierEmbedded.prototype.__proto__ = WebInspector.Linkifier.prototype;
+WebInspector.LinkifierEmbedded.constructor = WebInspector.Linkifier;
+WebInspector.LinkifierEmbedded.DefaultFormatter = WebInspector.Linkifier.DefaultFormatter;
+
+WebInspector.LinkifierEmbedded.prototype.linkifyLocation = function(sourceURL, lineNumber, columnNumber, classes)
 {
     return WebInspector.linkifyResourceAsNode(sourceURL, lineNumber, classes);
 }
 
+WebInspector.Linkifier = WebInspector.LinkifierEmbedded
 
-WebInspector.linkifyResourceAsNode = function(url, lineNumber, classes, tooltipText)
-{
+
+WebInspector.linkifyResourceAsNodeEmbedded = function(url, lineNumber, classes, tooltipText) {
     var linkText = WebInspector.formatLinkText(url, lineNumber);
     var anchor = WebInspector.linkifyURLAsNode(url, linkText, classes, true, tooltipText);
     anchor.preferredPanel = "resources";
     anchor.lineNumber = lineNumber;
     return anchor;
 }
+
+WebInspector.linkifyResourceAsNode = WebInspector.linkifyResourceAsNodeEmbedded;
+
+
 /*
  * Embedded Timeline creates a special Timeline Pane that can be embedded in an iframe
  * All the page needs is a div with the id "main"
@@ -24,7 +40,7 @@ WebInspector.linkifyResourceAsNode = function(url, lineNumber, classes, tooltipT
  WebInspector.initializeEmbeddedTimeline = function() {
     this.timelineManager = new WebInspector.TimelineManager();
     this.shortcutsScreen = new WebInspector.ShortcutsScreen();
-    this.resourceTreeModel = new WebInspector.ResourceTreeModelEmbedded();
+    this.resourceTreeModel = new WebInspector.ResourceTreeModel();
     this.drawer = new WebInspector.Drawer();
 
     this.timelinePanel = new WebInspector.TimelinePanel();
