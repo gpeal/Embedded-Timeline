@@ -5,7 +5,6 @@ WebInspector.ResourceTreeModelEmbedded.prototype.__proto__ = WebInspector.Resour
 
 WebInspector.Linkifier.prototype.linkifyLocation = function(sourceURL, lineNumber, columnNumber, classes)
 {
-
     return WebInspector.linkifyResourceAsNode(sourceURL, lineNumber, classes);
 }
 
@@ -13,9 +12,6 @@ WebInspector.Linkifier.prototype.linkifyLocation = function(sourceURL, lineNumbe
 WebInspector.linkifyResourceAsNode = function(url, lineNumber, classes, tooltipText)
 {
     var linkText = WebInspector.formatLinkText(url, lineNumber);
-    //NOTE: changed isExternal to true because the embedded timeline doesn't have the resource view
-    //to show the resource in the timline so it opens in a new tab
-    //FIXME: not sure how to integrate this better
     var anchor = WebInspector.linkifyURLAsNode(url, linkText, classes, true, tooltipText);
     anchor.preferredPanel = "resources";
     anchor.lineNumber = lineNumber;
