@@ -26,21 +26,6 @@ WebInspector.LinkifierEmbedded.prototype.linkifyLocation = function(url, lineNum
 
 WebInspector.Linkifier = WebInspector.LinkifierEmbedded
 
-
-
-/*WebInspector.TimelinePanel.wasShownEmbedded = function() {
-    WebInspector.Panel.prototype.wasShown.call(this);
-    if (!WebInspector.TimelinePanel._categoryStylesInitialized) {
-        WebInspector.TimelinePanel._categoryStylesInitialized = true;
-        this._injectCategoryStyles();
-    }
-    this._overviewPane.setMode(this._overviewModeSetting.get());
-    this._refresh();
-}
-
-WebInspector.TimelinePanel.prototype.wasShown = WebInspector.TimelinePanel.wasShownEmbedded;*/
-
-
 /*
  * Embedded Timeline creates a special Timeline Pane that can be embedded in an iframe
  * All the page needs is a div with the id "main"
