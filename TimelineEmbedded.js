@@ -2,6 +2,14 @@ WebInspector.ResourceTreeModelEmbedded = function() { }
 
 WebInspector.ResourceTreeModelEmbedded.prototype.__proto__ = WebInspector.ResourceTreeModel.prototype;
 
+
+WebInspector.Linkifier.prototype.linkifyLocation = function(sourceURL, lineNumber, columnNumber, classes)
+{
+
+    return WebInspector.linkifyResourceAsNode(sourceURL, lineNumber, classes);
+}
+
+
 WebInspector.linkifyResourceAsNode = function(url, lineNumber, classes, tooltipText)
 {
     var linkText = WebInspector.formatLinkText(url, lineNumber);
@@ -21,8 +29,6 @@ WebInspector.linkifyResourceAsNode = function(url, lineNumber, classes, tooltipT
     this.timelineManager = new WebInspector.TimelineManager();
     this.shortcutsScreen = new WebInspector.ShortcutsScreen();
     this.resourceTreeModel = new WebInspector.ResourceTreeModelEmbedded();
-    this.debuggerModel = new WebInspector.DebuggerModel();
-    this.inspectorView = new WebInspector.InspectorView();
     this.drawer = new WebInspector.Drawer();
 
     this.timelinePanel = new WebInspector.TimelinePanel();
