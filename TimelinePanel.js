@@ -194,9 +194,7 @@ WebInspector.TimelinePanel.prototype = {
 
     get statusBarItems()
     {
-        //NOTE: removed some icons not needed for the embedded timeline
-        //FIXME: not sure how to integrate this better
-        var statusBarItems = [ this.toggleFilterButton.element, this._glueParentButton.element, this.statusBarFilters ];
+        var statusBarItems = [ this.toggleFilterButton.element, this.toggleTimelineButton.element, this.clearButton.element, this.garbageCollectButton.element, this._glueParentButton.element, this.statusBarFilters ];
 
         return statusBarItems;
     },
