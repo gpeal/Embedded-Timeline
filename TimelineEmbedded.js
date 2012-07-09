@@ -14,23 +14,31 @@ WebInspector.LinkifierEmbedded.prototype.__proto__ = WebInspector.Linkifier.prot
 WebInspector.LinkifierEmbedded.constructor = WebInspector.Linkifier;
 WebInspector.LinkifierEmbedded.DefaultFormatter = WebInspector.Linkifier.DefaultFormatter;
 
-WebInspector.LinkifierEmbedded.prototype.linkifyLocation = function(sourceURL, lineNumber, columnNumber, classes)
+WebInspector.LinkifierEmbedded.prototype.linkifyLocation = function(url, lineNumber, columnNumber, classes)
 {
-    return WebInspector.linkifyResourceAsNode(sourceURL, lineNumber, classes);
-}
-
-WebInspector.Linkifier = WebInspector.LinkifierEmbedded
-
-
-WebInspector.linkifyResourceAsNodeEmbedded = function(url, lineNumber, classes, tooltipText) {
+    // From WebInspector.linkifyResourceAsNode except it's passing isExternal=true to linkifyURLAsNode.
     var linkText = WebInspector.formatLinkText(url, lineNumber);
-    var anchor = WebInspector.linkifyURLAsNode(url, linkText, classes, true, tooltipText);
+    var anchor = WebInspector.linkifyURLAsNode(url, linkText, classes, true, "");
     anchor.preferredPanel = "resources";
     anchor.lineNumber = lineNumber;
     return anchor;
 }
 
-WebInspector.linkifyResourceAsNode = WebInspector.linkifyResourceAsNodeEmbedded;
+WebInspector.Linkifier = WebInspector.LinkifierEmbedded
+
+
+
+/*WebInspector.TimelinePanel.wasShownEmbedded = function() {
+    WebInspector.Panel.prototype.wasShown.call(this);
+    if (!WebInspector.TimelinePanel._categoryStylesInitialized) {
+        WebInspector.TimelinePanel._categoryStylesInitialized = true;
+        this._injectCategoryStyles();
+    }
+    this._overviewPane.setMode(this._overviewModeSetting.get());
+    this._refresh();
+}
+
+WebInspector.TimelinePanel.prototype.wasShown = WebInspector.TimelinePanel.wasShownEmbedded;*/
 
 
 /*
@@ -41,7 +49,7 @@ WebInspector.linkifyResourceAsNode = WebInspector.linkifyResourceAsNodeEmbedded;
     this.timelineManager = new WebInspector.TimelineManager();
     this.shortcutsScreen = new WebInspector.ShortcutsScreen();
     this.resourceTreeModel = new WebInspector.ResourceTreeModel();
-    this.drawer = new WebInspector.Drawer();
+    this.drawer = new WebInspector.Drawer();  // Is it needed? Even the real DevTools UI does not seem to display it
 
     this.timelinePanel = new WebInspector.TimelinePanel();
     this.timelinePanel._isShowing = true;
