@@ -1,3 +1,8 @@
+//Overrides the original constructor to remove the DebuggerModel dependancy
+/**
+ * @constructor
+ * @extends {WebInspector.Object}
+ */
 WebInspector.ResourceTreeModelEmbedded = function() { }
 
 WebInspector.ResourceTreeModelEmbedded.prototype.__proto__ = WebInspector.ResourceTreeModel.prototype;
@@ -5,9 +10,12 @@ WebInspector.ResourceTreeModelEmbedded.prototype.__proto__ = WebInspector.Resour
 WebInspector.ResourceTreeModel = WebInspector.ResourceTreeModelEmbedded;
 
 
-
-WebInspector.LinkifierEmbedded = function() {
-    WebInspector.Linkifier.constructor.call(this);
+/**
+ * @constructor
+ * @param {WebInspector.LinkifierFormatter=} formatter
+ */
+WebInspector.LinkifierEmbedded = function(formatter) {
+    WebInspector.Linkifier.constructor.call(this, formatter);
 }
 
 WebInspector.LinkifierEmbedded.prototype.__proto__ = WebInspector.Linkifier.prototype;
@@ -16,7 +24,7 @@ WebInspector.LinkifierEmbedded.DefaultFormatter = WebInspector.Linkifier.Default
 
 WebInspector.LinkifierEmbedded.prototype.linkifyLocation = function(url, lineNumber, columnNumber, classes)
 {
-    // From WebInspector.linkifyResourceAsNode except it's passing isExternal=true to linkifyURLAsNode.
+    //From WebInspector.linkifyResourceAsNode except it's passing isExternal=true to linkifyURLAsNode.
     var linkText = WebInspector.formatLinkText(url, lineNumber);
     var anchor = WebInspector.linkifyURLAsNode(url, linkText, classes, true, "");
     anchor.preferredPanel = "resources";
@@ -35,29 +43,29 @@ WebInspector.Linkifier = WebInspector.LinkifierEmbedded
     this.shortcutsScreen = new WebInspector.ShortcutsScreen();
     this.resourceTreeModel = new WebInspector.ResourceTreeModel();
     //Is it needed? Even the real DevTools UI does not seem to display it
+    //The only dependancy is TimelinePanel:572 (WebInspector.drawer.currentPanelCounters = this.recordsCounter)
     this.drawer = new WebInspector.Drawer();
-
     this.timelinePanel = new WebInspector.TimelinePanel();
-    this.timelinePanel._isShowing = true;
 }
 
 /**
  * @constructor
- * @extends {WebInspector.Object}
  */
 WebInspector.TimelineEmbedded = function() { }
 
 WebInspector.TimelineEmbedded.prototype =  {
     show: function() 
     {
-    //insert the Timeline in the DOM
+        //FIXME: everything works fine with _isShowing = true but .show() breaks a lot of functionality
+        WebInspector.timelinePanel._isShowing = true;
+        //insert the Timeline in the DOM
         var mainDiv = document.getElementById("main-no-status-bar");
         var mainPanelsDiv = document.createElement("div");
         mainPanelsDiv.id = "main-panels"
         mainDiv.appendChild(mainPanelsDiv)
         var timelineDiv = WebInspector.timelinePanel.element;
         //WebKit doesn't want you to embed inspector elements in a page so they identify elements that came from the inspector because they have
-        //a __view proerty and override the appendChild method...
+        //a __view proerty and override the appendChild method to assert false... This hack temporarily removes the __view property.
         //FIXME: is is bad practice to modify private properties outside of their class. However, at this time there are no methods to change __view
         var __view = timelineDiv.__view;
         timelineDiv.__view = null;
@@ -115,9 +123,9 @@ window.addEventListener("DOMContentLoaded", pageLoaded, false);
 
 function getJSONUrl()
 {
-  var results = new RegExp("[\\?&]" + "url" + "=([^&#]*)").exec(window.location.search);
+  var results = new RegExp("[\\?&]url=([^&#]*)").exec(window.location.search);
   if(results == null)
     return "";
   else
-    return decodeURIComponent(results[1].replace(/\+/g, " "));
+    return results[1];
 }
