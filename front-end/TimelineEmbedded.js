@@ -39,9 +39,6 @@ WebInspector.Linkifier = WebInspector.LinkifierEmbedded
 
     this.timelinePanel = new WebInspector.TimelinePanel();
     this.timelinePanel._isShowing = true;
-    this.timelinePanel._overviewPane._frameOverview = new WebInspector.TimelineFrameOverview(this.timelinePanel._model);
-
-    this._frameController = new WebInspector.TimelineFrameController(this.timelinePanel._model, this.timelinePanel._overviewPane, this.timelinePanel._presentationModel);
 }
 
 /**
