@@ -34,7 +34,8 @@ WebInspector.Linkifier = WebInspector.LinkifierEmbedded
     this.timelineManager = new WebInspector.TimelineManager();
     this.shortcutsScreen = new WebInspector.ShortcutsScreen();
     this.resourceTreeModel = new WebInspector.ResourceTreeModel();
-    this.drawer = new WebInspector.Drawer();  // Is it needed? Even the real DevTools UI does not seem to display it
+    //Is it needed? Even the real DevTools UI does not seem to display it
+    this.drawer = new WebInspector.Drawer();
 
     this.timelinePanel = new WebInspector.TimelinePanel();
     this.timelinePanel._isShowing = true;
@@ -66,9 +67,6 @@ WebInspector.TimelineEmbedded.prototype =  {
         timelineDiv.addStyleClass("visible");
         mainPanelsDiv.appendChild(timelineDiv);
         timelineDiv.__view = __view;
-        //why doesn't this work?
-        //WebInspector.View._originalAppendChild.call(mainPanelsDiv, timelineDiv);
-
         //because this isn't running inside of a fully fledged inspector, some of the methods that set all of the panels styles aren't called
         WebInspector.timelinePanel.splitView._restoreSidebarWidth()
         WebInspector.timelinePanel.wasShown();
