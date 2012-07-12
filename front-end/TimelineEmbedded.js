@@ -42,7 +42,7 @@ WebInspector.Linkifier = WebInspector.LinkifierEmbedded
     this.timelineManager = new WebInspector.TimelineManager();
     this.shortcutsScreen = new WebInspector.ShortcutsScreen();
     this.resourceTreeModel = new WebInspector.ResourceTreeModel();
-    //Is it needed? Even the real DevTools UI does not seem to display it
+    //Is it needed? Even the real DevTools UI does not seem to display the drawer
     //The only dependancy is TimelinePanel:572 (WebInspector.drawer.currentPanelCounters = this.recordsCounter)
     this.drawer = new WebInspector.Drawer();
     this.timelinePanel = new WebInspector.TimelinePanel();
