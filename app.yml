@@ -1,0 +1,24 @@
+application: devtoolstimeline
+version: 2
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /stylesheets
+  static_dir: stylesheets
+
+- url: /js
+  static_dir: js
+
+- url: /json
+  static_dir: json
+
+- url: /Images
+  static_dir: Images
+
+- url: /logs
+  static_dir: logs
+
+- url: /.*
+  script: timeline.app

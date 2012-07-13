@@ -36,7 +36,7 @@
 WebInspector.SplitView = function(sidebarPosition, sidebarWidthSettingName, defaultSidebarWidth)
 {
     WebInspector.View.call(this);
-    this.registerRequiredCSS("splitView.css");
+    this.registerRequiredCSS("stylesheets/splitView.css");
 
     this.element.className = "split-view";
 

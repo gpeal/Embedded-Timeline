@@ -1,0 +1,188 @@
+<!--
+Copyright (C) 2006, 2007, 2008 Apple Inc.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1.  Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+2.  Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+3.  Neither the name of Apple Computer, Inc. ("Apple") nor the names of
+    its contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS "AS IS" AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/dialog.css">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/inspector.css">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/inspectorCommon.css">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/inspectorSyntaxHighlight.css">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/popover.css">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/timelinePanel.css">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/splitView.css">
+        
+        <!-- util !-->
+        <script type="text/javascript" src="/js/DOMExtension.js"></script>
+        <script type="text/javascript" src="/js/utilities.js"></script>
+        <script type="text/javascript" src="/js/treeoutline.js"></script>
+
+        <script type="text/javascript" src="/js/inspector.js"></script>
+
+        <!-- common !-->
+        <script type="text/javascript" src="/js/Object.js"></script>
+        <script type="text/javascript" src="/js/Settings.js"></script>
+        <script type="text/javascript" src="/js/UserMetrics.js"></script>
+        <script type="text/javascript" src="/js/HandlerRegistry.js"></script>
+        <script type="text/javascript" src="/js/View.js"></script> <!-- moved from ui!-->
+        <script type="text/javascript" src="/js/HelpScreen.js"></script> <!-- moved from ui!-->
+        <script type="text/javascript" src="/js/InspectorFrontendHostStub.js"></script>
+
+        <script type="text/javascript" src="/js/WorkerManager.js"></script> <!-- needed from the unneccesary scripts section !-->
+        <!-- sdk !-->
+        <script type="text/javascript" src="/js/InspectorBackend.js"></script>
+        <script type="text/javascript" src="/js/ApplicationCacheModel.js"></script>
+        <script type="text/javascript" src="/js/Color.js"></script>
+        <script type="text/javascript" src="/js/CompilerScriptMapping.js"></script>
+        <script type="text/javascript" src="/js/ConsoleModel.js"></script>
+        <script type="text/javascript" src="/js/ContentProvider.js"></script>
+        <script type="text/javascript" src="/js/ContentProviders.js"></script>
+        <script type="text/javascript" src="/js/CookieParser.js"></script>
+        <script type="text/javascript" src="/js/CSSCompletions.js"></script>
+        <script type="text/javascript" src="/js/CSSKeywordCompletions.js"></script>
+        <!--script type="text/javascript" src="/js/CSSStyleModel.js"></script!--> <!-- non existent !-->
+        <script type="text/javascript" src="/js/BreakpointManager.js"></script>
+        <script type="text/javascript" src="/js/Database.js"></script>
+        <script type="text/javascript" src="/js/DOMAgent.js"></script>
+        <!--script type="text/javascript" src="/js/DOMStorage.js"></script!--> <!-- non existent !-->
+        <script type="text/javascript" src="/js/DebuggerModel.js"></script>
+        <script type="text/javascript" src="/js/Resource.js"></script> <!-- moved from below in sdk !-->
+        <script type="text/javascript" src="/js/DebuggerResourceBinding.js"></script>
+        <script type="text/javascript" src="/js/DebuggerScriptMapping.js"></script>
+        <script type="text/javascript" src="/js/FileManager.js"></script>
+        <script type="text/javascript" src="/js/FileSystemModel.js"></script>
+        <script type="text/javascript" src="/js/HAREntry.js"></script>
+        <script type="text/javascript" src="/js/IndexedDBModel.js"></script>
+        <script type="text/javascript" src="/js/Linkifier.js"></script>
+        <script type="text/javascript" src="/js/NetworkLog.js"></script>
+        <script type="text/javascript" src="/js/Placard.js"></script>
+        <script type="text/javascript" src="/js/Script.js"></script>
+        <script type="text/javascript" src="/js/ScriptFormatter.js"></script>
+        <script type="text/javascript" src="/js/UISourceCode.js"></script> <!-- moved from below in sdk !-->
+        <script type="text/javascript" src="/js/JavaScriptSource.js"></script> <!-- moved from components !-->
+        <script type="text/javascript" src="/js/ScriptSnippetModel.js"></script>
+        <script type="text/javascript" src="/js/SnippetStorage.js"></script>
+        <script type="text/javascript" src="/js/SourceMapping.js"></script>
+        <script type="text/javascript" src="/js/TimelineManager.js"></script>
+        <script type="text/javascript" src="/js/TimelineModel.js"></script>
+        <script type="text/javascript" src="/js/RawSourceCode.js"></script>
+        <script type="text/javascript" src="/js/RemoteObject.js"></script>
+        <!--script type="text/javascript" src="/js/Resource.js"></script!-->
+        <script type="text/javascript" src="/js/ResourceScriptMapping.js"></script>
+        <script type="text/javascript" src="/js/ResourceTreeModel.js"></script>
+        <script type="text/javascript" src="/js/ResourceType.js"></script>
+        <script type="text/javascript" src="/js/ResourceUtils.js"></script>
+        <script type="text/javascript" src="/js/NetworkManager.js"></script>
+        <!--script type="text/javascript" src="/js/NetworkRequest.js"></script!--> <!-- non existent !-->
+        <!--script type="text/javascript" src="/js/UISourceCode.js"></script!-->
+        <!--script type="text/javascript" src="/js/UserAgentSupport.js"></script!--> <!-- non existent !-->
+
+        <!-- ui !-->
+        <script type="text/javascript" src="/js/AdvancedSearchController.js"></script>
+        <script type="text/javascript" src="/js/Checkbox.js"></script>
+        <script type="text/javascript" src="/js/ContextMenu.js"></script>
+        <script type="text/javascript" src="/js/CookiesTable.js"></script>
+        <script type="text/javascript" src="/js/DOMSyntaxHighlighter.js"></script>
+        <script type="text/javascript" src="/js/DataGrid.js"></script>
+        <script type="text/javascript" src="/js/Dialog.js"></script>
+        <script type="text/javascript" src="/js/Drawer.js"></script>
+        <script type="text/javascript" src="/js/EmptyView.js"></script>
+        <!--script type="text/javascript" src="/js/HelpScreen.js"></script!-->
+        <script type="text/javascript" src="/js/InspectorView.js"></script>
+        <script type="text/javascript" src="/js/KeyboardShortcut.js"></script>
+        <script type="text/javascript" src="/js/Panel.js"></script>
+        <script type="text/javascript" src="/js/PanelEnablerView.js"></script>
+        <script type="text/javascript" src="/js/Popover.js"></script>
+        <script type="text/javascript" src="/js/Section.js"></script> <!-- moved from below in ui !-->
+        <script type="text/javascript" src="/js/PropertiesSection.js"></script>
+        <script type="text/javascript" src="/js/SearchController.js"></script>
+        <!--script type="text/javascript" src="/js/Section.js"></script!-->
+        <script type="text/javascript" src="/js/SidebarPane.js"></script>
+        <script type="text/javascript" src="/js/SidebarTreeElement.js"></script>
+        <script type="text/javascript" src="/js/ShortcutsScreen.js"></script>
+        <script type="text/javascript" src="/js/ShowMoreDataGridNode.js"></script>
+        <script type="text/javascript" src="/js/SidebarOverlay.js"></script>
+        <script type="text/javascript" src="/js/SoftContextMenu.js"></script>
+        <script type="text/javascript" src="/js/SourceTokenizer.js"></script>
+        <script type="text/javascript" src="/js/Spectrum.js"></script>
+        <script type="text/javascript" src="/js/SplitView.js"></script>
+        <script type="text/javascript" src="/js/StatusBarButton.js"></script>
+        <script type="text/javascript" src="/js/TabbedPane.js"></script>
+        <script type="text/javascript" src="/js/TextEditorModel.js"></script>
+        <script type="text/javascript" src="/js/TextEditorHighlighter.js"></script>
+        <script type="text/javascript" src="/js/TextPrompt.js"></script>
+        <script type="text/javascript" src="/js/TextViewer.js"></script>
+        <script type="text/javascript" src="/js/Toolbar.js"></script>
+        <script type="text/javascript" src="/js/UIUtils.js"></script>
+        <!--script type="text/javascript" src="/js/View.js"></script!-->
+
+        <!-- components !-->
+        <script type="text/javascript" src="/js/ConsoleMessage.js"></script>
+        <script type="text/javascript" src="/js/BreakpointsSidebarPane.js"></script>
+        <script type="text/javascript" src="/js/DOMBreakpointsSidebarPane.js"></script>
+        <script type="text/javascript" src="/js/DOMPresentationUtils.js"></script>
+        <script type="text/javascript" src="/js/ElementsTreeOutline.js"></script>
+        <script type="text/javascript" src="/js/ObjectPropertiesSection.js"></script> <!-- moved from below in components !-->
+        <script type="text/javascript" src="/js/EventListenersSidebarPane.js"></script>
+        <script type="text/javascript" src="/js/FilteredItemSelectionDialog.js"></script>
+        <script type="text/javascript" src="/js/GoToLineDialog.js"></script>
+        <script type="text/javascript" src="/js/NavigatorOverlayController.js"></script>
+        <script type="text/javascript" src="/js/NavigatorView.js"></script>
+        <script type="text/javascript" src="/js/JavaScriptContextManager.js"></script>
+        <!--script type="text/javascript" src="/js/JavaScriptSource.js"></script!-->
+        <script type="text/javascript" src="/js/ObjectPopoverHelper.js"></script>
+        <!--script type="text/javascript" src="/js/ObjectPropertiesSection.js"></script!-->
+        <script type="text/javascript" src="/js/PropertiesSidebarPane.js"></script>
+        <script type="text/javascript" src="/js/SourceFrame.js"></script>
+        <script type="text/javascript" src="/js/TimelineGrid.js"></script>
+
+        <!-- timeline !-->
+        <script type="text/javascript" src="/js/MemoryStatistics.js"></script>
+        <script type="text/javascript" src="/js/TimelineOverviewPane.js"></script>
+        <script type="text/javascript" src="/js/TimelinePanel.js"></script>
+        <script type="text/javascript" src="/js/TimelinePresentationModel.js"></script>
+        <script type="text/javascript" src="/js/TimelineFrameController.js"></script>
+
+        <script type="text/javascript" src="/js/TimelineEmbedded.js"></script>
+
+    </head>
+    <body>
+        <div id="main-no-status-bar">
+            <div id="main-status-bar" class="status-bar">
+                <div id="anchored-status-bar-items">
+                    <div id="counters">
+                        <div id="error-warning-count" class="hidden">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="drawer">
+        </div>
+    </body>
+</html>
