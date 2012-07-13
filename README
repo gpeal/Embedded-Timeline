@@ -1,0 +1,5 @@
+This is an embeddable version of the timeline view from the WebKit developer tools.
+
+I have extracted the neccesary dependencies from WebKit and packaged them in such a way that the timeline can run as a standalone html page.
+
+To use it, pass it a query param url= and a path (either locally or remotely) to a json timeline recording and it will automatically load it.
